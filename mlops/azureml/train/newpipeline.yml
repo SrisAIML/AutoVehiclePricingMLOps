@@ -40,17 +40,17 @@ jobs:
       test_data: ${{parent.outputs.test_data}}
 
   sweep_step:
-    name: sweep-job
-    display_name: sweep-job  # Provide the display name for the job
+    name: sweep-job # Specify internal job identifier
+    display_name: sweep-job  # Provide the display name for the job in Azure ML Studion UI
     type: sweep
     inputs:
-      train_data: ${{parent.jobs.prep_data.outputs.train_data}}
-      test_data: ${{parent.jobs.prep_data.outputs.test_data}}
+      train_data: ${{parent.jobs.prep_data.outputs.train_data}} # location of train dataset
+      test_data: ${{parent.jobs.prep_data.outputs.test_data}} # location of test dataset
     outputs:
       model_output:
-        type: mlflow_model
-    sampling_algorithm: random  # Specify the sampling algorithm
-    trial: ./train.yml  # Refers to a separate command component
+        type: mlflow_model # The best tuned model as mlflow_model output
+    sampling_algorithm: random  # Hyperparameter configurations will be sampled randomly from search space
+    trial: ./train.yml  # Refers to a separate command component that defines how a single train job runs. One training run with a particular parameter run.
     search_space:
       n_estimators:
         type: choice
@@ -60,11 +60,11 @@ jobs:
         values: [1, 3, 5, 10]  # Provide the values for max_depth
     objective:
       goal: minimize
-      primary_metric: MSE
+      primary_metric: MSE # Seep job to look at MSE metric for each training run with a goal to get the model with minimum MSE
     limits:
-      max_total_trials: 20
-      max_concurrent_trials: 10
-      timeout: 7200
+      max_total_trials: 20 # Run at most 20 trials total 
+      max_concurrent_trials: 10 # Run at most 10 trails at once (parllelism) 
+      timeout: 7200 # Stop everything after 2 hours if not finished
 
 
   register_model:
